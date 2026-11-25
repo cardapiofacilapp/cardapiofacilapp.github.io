@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#0f9d58"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%9B%8D%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#0f9d58"><link rel="icon" type="image/png" href="icone-64.png"><link rel="apple-touch-icon" href="icone-180.png"><link rel="manifest" href="manifest.json"><meta name="apple-mobile-web-app-title" content="Cardápio Fácil">
 <title>Cardápio Fácil</title>
 <style>
 /* VOICE: amigável e simples, para lojista sem experiência
@@ -112,7 +112,7 @@ html:has(#sheet.open),body:has(#sheet.open),html:has(.chat.open),body:has(.chat.
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap"></head>
 <body>
-<div class="top"><span class="brand">Cardápio Fácil</span><small id="topNome"></small></div>
+<div class="top"><span class="brand" style="display:flex;align-items:center;gap:8px"><img src="icone-64.png" alt="" style="width:28px;height:28px">Cardápio Fácil</span><small id="topNome"></small></div>
 <div class="wrap" id="view"></div>
 <nav class="tabs hidden" id="tabs"></nav>
 <div class="sheet" id="sheet"><div class="pan" id="pan"></div></div>
@@ -1377,14 +1377,14 @@ function criarNuvem(){
  const SITE=location.origin+location.pathname.replace(/[^/]*$/,"");
  const RE=/data:image\/[a-zA-Z+.-]+;base64,[A-Za-z0-9+/=]+/g;
  let A,F,auth,db,user=null,slug=null,tm=0,ultimo="",subidas=new Set(),criado=false,ouvindo=null,enviando=null,primeira=true,modo="entrar";
- const css=`#nv{position:fixed;inset:0;z-index:200;background:linear-gradient(160deg,#e3f6ec,#f6f9f7 55%);display:flex;align-items:center;justify-content:center;padding:18px;overflow:auto}#nv .cx{background:#fff;border-radius:22px;box-shadow:0 10px 40px rgba(15,60,35,.12);padding:26px 22px;max-width:390px;width:100%;text-align:center}#nv .lg{width:64px;height:64px;border-radius:18px;background:var(--a);color:#fff;font-size:2rem;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}#nv h1{font-size:1.45rem;margin:0 0 4px;color:var(--ink)}#nv p{color:var(--mu);margin:0 0 16px;font-size:.95rem}#nv input{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;font:inherit;margin-bottom:10px;background:#fff;color:#222}#nv input:focus{outline:2px solid var(--a);border-color:transparent}#nv .b{width:100%;padding:13px;border-radius:12px;border:0;font:inherit;font-weight:700;cursor:pointer;background:var(--a);color:#fff;font-size:1rem}#nv .g{background:#fff;color:#222;border:1.5px solid #dadce0;display:flex;align-items:center;justify-content:center;gap:10px}#nv .ou{display:flex;align-items:center;gap:10px;color:var(--mu);font-size:.85rem;margin:16px 0}#nv .ou:before,#nv .ou:after{content:"";flex:1;height:1px;background:var(--line)}#nv .lk{background:none;border:0;color:var(--a);font:inherit;font-weight:700;cursor:pointer;padding:6px;font-size:.92rem}#nv .er{color:#b3261e;font-size:.9rem;margin:4px 0 10px;min-height:1em}#nv .ok{color:var(--a)}#nv .sp{width:38px;height:38px;border:4px solid var(--a2);border-top-color:var(--a);border-radius:50%;animation:nvr 1s linear infinite;margin:10px auto}@keyframes nvr{to{transform:rotate(360deg)}}#nv small{color:var(--mu);display:block;margin-top:14px;font-size:.8rem}`;
+ const css=`#nv{position:fixed;inset:0;z-index:200;background:linear-gradient(160deg,#e3f6ec,#f6f9f7 55%);display:flex;align-items:center;justify-content:center;padding:18px;overflow:auto}#nv .cx{background:#fff;border-radius:22px;box-shadow:0 10px 40px rgba(15,60,35,.12);padding:26px 22px;max-width:390px;width:100%;text-align:center}#nv .lg{width:76px;height:76px;display:block;margin:0 auto 10px;filter:drop-shadow(0 6px 14px rgba(15,60,35,.25))}#nv h1{font-size:1.45rem;margin:0 0 4px;color:var(--ink)}#nv p{color:var(--mu);margin:0 0 16px;font-size:.95rem}#nv input{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;font:inherit;margin-bottom:10px;background:#fff;color:#222}#nv input:focus{outline:2px solid var(--a);border-color:transparent}#nv .b{width:100%;padding:13px;border-radius:12px;border:0;font:inherit;font-weight:700;cursor:pointer;background:var(--a);color:#fff;font-size:1rem}#nv .g{background:#fff;color:#222;border:1.5px solid #dadce0;display:flex;align-items:center;justify-content:center;gap:10px}#nv .ou{display:flex;align-items:center;gap:10px;color:var(--mu);font-size:.85rem;margin:16px 0}#nv .ou:before,#nv .ou:after{content:"";flex:1;height:1px;background:var(--line)}#nv .lk{background:none;border:0;color:var(--a);font:inherit;font-weight:700;cursor:pointer;padding:6px;font-size:.92rem}#nv .er{color:#b3261e;font-size:.9rem;margin:4px 0 10px;min-height:1em}#nv .ok{color:var(--a)}#nv .sp{width:38px;height:38px;border:4px solid var(--a2);border-top-color:var(--a);border-radius:50%;animation:nvr 1s linear infinite;margin:10px auto}@keyframes nvr{to{transform:rotate(360deg)}}#nv small{color:var(--mu);display:block;margin-top:14px;font-size:.8rem}`;
  function tela(h){let el=$("nv");if(!el){const st=document.createElement("style");st.textContent=css;document.head.appendChild(st);el=document.createElement("div");el.id="nv";document.body.appendChild(el)}el.innerHTML=`<div class="cx">${h}</div>`;el.style.display="flex";return el}
  function fecharTela(){const el=$("nv");if(el)el.style.display="none"}
- function carregando(t){tela(`<div class="lg">🛍️</div><h1>Cardápio Fácil</h1><div class="sp"></div><p>${t}</p>`)}
+ function carregando(t){tela(`<img class="lg" src="icone-192.png" alt=""><h1>Cardápio Fácil</h1><div class="sp"></div><p>${t}</p>`)}
  const ERR={"auth/invalid-credential":"E-mail ou senha errados.","auth/wrong-password":"E-mail ou senha errados.","auth/user-not-found":"Não achei conta com esse e-mail. Toque em \"Criar conta grátis\".","auth/invalid-email":"Esse e-mail não parece certo. Confira.","auth/email-already-in-use":"Esse e-mail já tem conta. Toque em \"Já tenho conta\" e entre.","auth/weak-password":"A senha precisa ter pelo menos 6 letras ou números.","auth/missing-password":"Escreva a senha.","auth/network-request-failed":"Sem internet. Confira a conexão e tente de novo.","auth/too-many-requests":"Muitas tentativas. Espere alguns minutos e tente de novo.","auth/popup-closed-by-user":"","auth/cancelled-popup-request":""};
  const msgErr=e=>e&&e.code in ERR?ERR[e.code]:"Não deu certo. Tente de novo.";
  function login(){const cri=modo=="criar";
-  tela(`<div class="lg">🛍️</div><h1>Cardápio Fácil</h1><p>${cri?"Crie sua conta grátis e monte a loja do seu delivery em minutos.":"Sua loja de delivery com pedidos direto no WhatsApp, sem comissão."}</p>
+  tela(`<img class="lg" src="icone-192.png" alt=""><h1>Cardápio Fácil</h1><p>${cri?"Crie sua conta grátis e monte a loja do seu delivery em minutos.":"Sua loja de delivery com pedidos direto no WhatsApp, sem comissão."}</p>
   <button class="b g" id="nvG"><svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>${cri?"Criar conta com o Google":"Entrar com o Google"}</button>
   <div class="ou">ou com e-mail</div>
   <input id="nvE" type="email" autocomplete="email" placeholder="Seu e-mail"><input id="nvS" type="password" autocomplete="${cri?"new-password":"current-password"}" placeholder="${cri?"Crie uma senha (mínimo 6)":"Sua senha"}">
@@ -1431,11 +1431,11 @@ function criarNuvem(){
      if(!S||!S._t||S._t<x.atual){const fotos=await baixarFotos(slug);Object.keys(fotos).forEach(i=>subidas.add(i));const ped=(S&&S.pedidos)||[];S=JSON.parse(volta(x.estado,fotos));S.pedidos=ped;S._t=x.atual;ultimo=x.estado+"\u0001"+x.pub;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
      else{const fotos=await F.getDocs(F.collection(db,"lojas",slug,"fotos"));fotos.forEach(f=>subidas.add(f.id));sync()}}}
    else if(S)sync();
-  }catch(e){console.error(e);tela(`<div class="lg">🛍️</div><h1>Ops!</h1><p>Não consegui abrir sua loja. Confira a internet.</p><button class="b" onclick="location.reload()">Tentar de novo</button>`);return}
+  }catch(e){console.error(e);tela(`<img class="lg" src="icone-192.png" alt=""><h1>Ops!</h1><p>Não consegui abrir sua loja. Confira a internet.</p><button class="b" onclick="location.reload()">Tentar de novo</button>`);return}
   fecharTela();posBoot();ouvir()}
  async function boot(){carregando("Carregando…");
   try{const r=await Promise.all([import(BASE+"firebase-app.js"),import(BASE+"firebase-auth.js"),import(BASE+"firebase-firestore.js")]);A=r[1];F=r[2];const ap=r[0].initializeApp(CFG);auth=A.getAuth(ap);db=F.getFirestore(ap);try{auth.languageCode="pt-BR"}catch(e){}}
-  catch(e){console.error(e);tela(`<div class="lg">🛍️</div><h1>Sem conexão</h1><p>Não consegui conectar. Confira a internet e tente de novo.</p><button class="b" onclick="location.reload()">Tentar de novo</button>`);return}
+  catch(e){console.error(e);tela(`<img class="lg" src="icone-192.png" alt=""><h1>Sem conexão</h1><p>Não consegui conectar. Confira a internet e tente de novo.</p><button class="b" onclick="location.reload()">Tentar de novo</button>`);return}
   try{A.getRedirectResult(auth).catch(()=>{})}catch(e){}
   A.onAuthStateChanged(auth,u=>{if(u){if(!user||user.uid!=u.uid)entrar(u)}else{user=null;login()}})}
  const link=()=>slug?SITE+"loja/?"+slug:"";
@@ -1455,5 +1455,5 @@ function posBoot(){draw();try{if(S&&sessionStorage.getItem("cfImp")){tab="cardap
 if(NV)NV.boot();else posBoot();
 }
 </script>
-</body>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{})</script></body>
 </html>
