@@ -118,7 +118,7 @@ html:has(#sheet.open),body:has(#sheet.open),html:has(.chat.open),body:has(.chat.
 <div class="sheet" id="sheet"><div class="pan" id="pan"></div></div>
 <div class="dlg" id="dlg"><div class="box" id="dlgBox"></div></div>
 <div class="toast" id="toast"></div>
-<button class="fab hidden" id="fab" aria-label="Ajudante"><span>💬</span>Ajudante</button>
+<button class="fab hidden ia" id="fab" aria-label="Ajudante"><span>💬</span>Ajudante</button>
 <div class="chat" id="chat" aria-hidden="true"><div class="chp">
  <div class="chh"><div><b>💬 Ajudante</b><small>Tire dúvidas ou peça para eu mudar sua loja</small></div><button class="x" id="chX" aria-label="Fechar">×</button></div>
  <div class="chm" id="chM"></div>
@@ -583,6 +583,7 @@ const KEY="cardapiofacil_v1";
 const NUVEM=location.hostname.endsWith("github.io")||/[?&]nuvem/.test(location.search);
 const SEMIA=NUVEM?"Essa função com inteligência artificial chega em breve! 🚀":"Essa função usa a IA do Claude e só funciona com o app aberto pelo Claude.";
 const NV=NUVEM?criarNuvem():null;
+if(NUVEM){document.documentElement.classList.add("semia");const st=document.createElement("style");st.textContent="html.semia .ia{display:none!important}";document.head.appendChild(st)}
 let S=null;
 try{S=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){}
 try{if(S&&S.grupos)Object.values(S.grupos).forEach(G=>(G.ops||[]).forEach(o=>{if(o[0]=="Não precisa trocar"||o[0]=="Não trocar")o[0]="Pode tirar do pedido (não quero outro)"}))}catch(e){}
@@ -668,9 +669,9 @@ function drawWiz(){const v=$("view"),st=`<div class="steps">${[1,2,3].map(i=>`<i
    $("wNext").onclick=()=>{wiz.nome=$("wNome").value;wiz.whats=$("wWhats").value;
      if(!wiz.nome.trim())return toast("Escreva o nome da loja");if(wiz.whats.replace(/\D/g,"").length<10)return toast("Coloque o WhatsApp com DDD");wiz.step=2;drawWiz()};return}
   if(wiz.step==2){v.innerHTML=`${st}<h1>O que você vende?</h1><p class="mu">Escolha o modelo mais parecido. Ele já vem com categorias, produtos de exemplo e complementos prontos. Depois é só trocar pelos seus.</p>
-   <div class="imp" style="cursor:default"><span>📸</span><div><b>Já vende no iFood? Tem um jeito mais fácil!</b><small>Escolha o modelo aqui embaixo e, no próximo passo, toque em <b>Importar do iFood</b>: a IA coloca todos os seus produtos, preços, fotos e cores a partir de prints da sua loja.</small></div></div>
+   <div class="imp ia" style="cursor:default"><span>📸</span><div><b>Já vende no iFood? Tem um jeito mais fácil!</b><small>Escolha o modelo aqui embaixo e, no próximo passo, toque em <b>Importar do iFood</b>: a IA coloca todos os seus produtos, preços, fotos e cores a partir de prints da sua loja.</small></div></div>
    <div class="tpls">${Object.entries(TEMPLATES).filter(([k])=>k!="custom").map(([k,T])=>`<button class="tpl ${wiz.tipo==k?"on":""}" data-t="${k}">${ILUS[T.ilus]}${T.nome}</button>`).join("")}</div>
-   <div class="box outrob"><b>✍️ Não achou o seu? Escreva o que você vende</b><p class="mu" style="font-size:.85rem;margin:4px 0 8px">A IA monta um modelo só para você, com categorias, produtos de exemplo e complementos.</p>
+   <div class="box outrob ia"><b>✍️ Não achou o seu? Escreva o que você vende</b><p class="mu" style="font-size:.85rem;margin:4px 0 8px">A IA monta um modelo só para você, com categorias, produtos de exemplo e complementos.</p>
    <input id="wOut" value="${esc(wiz.outro||"")}" placeholder="Ex.: produtos de supermercado, bolos de aniversário, roupas, gás e água…">
    <button class="btn full" id="wIA" style="margin-top:8px">✨ Criar meu modelo</button><p class="mu" id="wIAst" style="font-size:.85rem;margin-top:6px"></p></div><br>
    <div class="row"><button class="btn sec" id="wBack">Voltar</button><button class="btn" id="wNext" ${wiz.tipo?"":"disabled"}>Continuar</button></div>`;
@@ -679,7 +680,7 @@ function drawWiz(){const v=$("view"),st=`<div class="steps">${[1,2,3].map(i=>`<i
   const T=TEMPLATES[wiz.tipo];
   v.innerHTML=`${st}<h1>Tudo pronto para criar</h1><div class="box"><p><b>${esc(wiz.nome)}</b> · ${esc(wiz.whats)}</p><p class="mu">Modelo: ${T.nome} · ${T.cats.reduce((a,c)=>a+c.itens.length,0)} produtos de exemplo · ${Object.keys(T.grupos).length} grupos de complementos</p></div>
    <div class="tip"><b>Importante:</b> os preços e produtos do modelo são só exemplos. Na próxima tela você troca pelos seus, com suas fotos.</div>
-   <button class="imp" id="wImp"><span>📸</span><div><b>Criar e importar do iFood (mais fácil)</b><small>Tire prints da sua loja no iFood e a IA monta o cardápio com seus produtos, preços, fotos e cores.</small></div></button>
+   <button class="imp ia" id="wImp"><span>📸</span><div><b>Criar e importar do iFood (mais fácil)</b><small>Tire prints da sua loja no iFood e a IA monta o cardápio com seus produtos, preços, fotos e cores.</small></div></button>
    <div class="row"><button class="btn sec" id="wBack">Voltar</button><button class="btn" id="wGo">Criar com exemplos</button></div>`;
   $("wBack").onclick=()=>{wiz.step=2;drawWiz()};$("wGo").onclick=()=>criarLoja(false);$("wImp").onclick=()=>criarLoja(true)}
 
@@ -706,7 +707,7 @@ function drawInicio(){const its=S.cats.flatMap(c=>c.itens);const fotos=its.filte
   const ck=[[!!S.loja.nome&&!!S.loja.whats,"Nome e WhatsApp da loja","visual"],[!!S.loja.logo,"Colocar o logo","visual#secLogo"],[its.length&&ex==0,`Trocar os produtos de exemplo pelos seus${ex?` (faltam ${ex})`:""}`,"cardapio"],[its.length&&fotos==its.length,`Fotos dos produtos (${fotos} de ${its.length})`,"cardapio"],[!!S.loja.banner,"Foto de capa (opcional)","visual#secCapa"]];
   const pct=Math.round(ck.filter(c=>c[0]).length/ck.length*100);
   $("view").innerHTML=`<h1>Olá, ${esc(S.loja.nome)}!</h1><p class="mu">Complete os passos abaixo para deixar sua loja caprichada.</p>
-  ${ex?`<button class="imp" id="hImp"><span>📸</span><div><b>Jeito mais fácil: importar do iFood</b><small>Tire prints da sua loja no iFood e a IA troca os ${ex} produtos de exemplo pelos seus, com preços, fotos e cores.</small></div></button>`:""}
+  ${ex?`<button class="imp ia" id="hImp"><span>📸</span><div><b>Jeito mais fácil: importar do iFood</b><small>Tire prints da sua loja no iFood e a IA troca os ${ex} produtos de exemplo pelos seus, com preços, fotos e cores.</small></div></button>`:""}
   <button class="lojab ${S.loja.fechada?"off":""}" id="hLoja"><span>${S.loja.fechada?"🔴":"🟢"}</span><div><b>${S.loja.fechada?"Loja fechada":"Loja aberta"}</b><small>${S.loja.fechada?"Toque para abrir e voltar a receber pedidos":"Toque para fechar agora (folga, imprevisto, acabou tudo…)"}</small></div></button>
   <div class="box"><b>Sua loja está ${pct}% pronta</b><div class="bar"><div style="width:${pct}%"></div></div>
    ${ck.map(([ok,t,go])=>`<div class="chk"><i class="${ok?"ok":""}">${ok?"✓":""}</i><span style="flex:1">${t}</span>${ok?"":`<button class="btn sec sm" data-go="${go}">Fazer</button>`}</div>`).join("")}</div>
@@ -838,7 +839,7 @@ function drawCompl(){const uso=k=>S.cats.reduce((a,c)=>a+c.itens.filter(i=>(i.g|
   <div class="box">${PERG_TODOS.map(P=>{const on=P.f?S.cfg[P.f]:(S.cfg.todos||{})[P.k];return`<div class="gl"><div class="gn"><b>${P.t}</b><small>${P.d}</small></div><label class="sw"><input type="checkbox" data-pt="${P.k}" ${on?"checked":""}><i></i></label></div>`}).join("")}</div>
   ${Object.entries(S.grupos).map(([k,G])=>`<div class="box gl" data-gr="${k}" style="cursor:pointer"><div class="gn"><b>${esc(G.n)}</b><small>${G.ops.length} opções · ${(k=="talher"&&S.cfg.talherTodos)||(k=="bebida"&&S.cfg.bebidaTodos)||(S.cfg.todos||{})[k]?"em todos os produtos":uso(k)?"em "+uso(k)+" produto"+(uso(k)>1?"s":""):`<span style="color:#c0392b">não aparece em nenhum produto, toque para escolher</span>`}${G.qtd?" · pode repetir":""}${G.cobra=="maior"?" · cobra a mais cara":G.cobra=="media"?" · cobra a média":""}</small></div><span class="icon">✎</span></div>`).join("")}
   <button class="btn full" id="addG">+ Novo grupo de complementos</button>
-  <div class="regs" style="margin-top:10px;grid-template-columns:1fr 1fr"><button id="gIA"><span>✨</span><b>Criar com IA</b><small>Diga o que quer, ex.: "molhos para hambúrguer"</small></button><label class="regb"><span>📸</span><b>Ler print do iFood</b><small>Print da tela de opções de um produto</small><input type="file" accept="image/*" multiple id="gPrint" class="fh"></label></div>
+  <div class="regs ia" style="margin-top:10px;grid-template-columns:1fr 1fr"><button id="gIA"><span>✨</span><b>Criar com IA</b><small>Diga o que quer, ex.: "molhos para hambúrguer"</small></button><label class="regb"><span>📸</span><b>Ler print do iFood</b><small>Print da tela de opções de um produto</small><input type="file" accept="image/*" multiple id="gPrint" class="fh"></label></div>
   <label style="margin-top:18px">Grupos prontos <small class="mu" style="font-weight:400">(toque para adicionar e depois edite)</small></label>
   <div class="seg">${GRUPOS_PRONTOS.map((G,i)=>`<button data-gp="${i}">+ ${esc(G.m||G.n)}</button>`).join("")}</div>
   <div class="tip" style="margin-top:14px"><b>Dica:</b> coloque sempre uma opção "Sem…" ou "Não, obrigado", assim o cliente não fica travado.</div>`;
@@ -1154,8 +1155,8 @@ function drawPedidos(){const ps=pedFiltro().filter(p=>p.status!="cancel"),fat=ps
   <div class="kpis"><div><small>Pedidos</small><b>${ps.length}</b></div><div><small>Vendido</small><b>${brl(fat)}</b></div><div><small>Ticket médio</small><b>${brl(tk)}</b></div></div>
   <label style="margin-top:4px">Registrar um pedido</label>
   <div class="regs"><button id="pCola"><span>📋</span><b>Colar a mensagem</b><small>Copie o pedido no WhatsApp e cole</small></button>
-  <label class="regb"><span>📸</span><b>Enviar print</b><small>Print do WhatsApp ou do iFood</small><input type="file" accept="image/*" multiple id="pPrintH" class="fh"></label>
-  <label class="regb"><span>📷</span><b>Tirar foto</b><small>Da comanda ou papel anotado</small><input type="file" accept="image/*" capture="environment" id="pFotoH" class="fh"></label>
+  <label class="regb ia"><span>📸</span><b>Enviar print</b><small>Print do WhatsApp ou do iFood</small><input type="file" accept="image/*" multiple id="pPrintH" class="fh"></label>
+  <label class="regb ia"><span>📷</span><b>Tirar foto</b><small>Da comanda ou papel anotado</small><input type="file" accept="image/*" capture="environment" id="pFotoH" class="fh"></label>
   <button id="pNovo"><span>✍️</span><b>Digitar</b><small>Pedido por telefone ou balcão</small></button></div>
   <p class="mu" style="font-size:.82rem;margin-top:6px">Os pedidos feitos pelo seu site aparecem aqui sozinhos. Os que chegam por outros caminhos você registra de um desses jeitos.</p>
   ${lista.length?lista.map(p=>{const s=stInfo(p.status);return`<button class="ped" data-p="${p.id}"><div><b>${p.cod?"Nº "+esc(p.cod)+" · ":""}${esc(p.nome||"Cliente")}</b><small>${new Date(p.data).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})} · ${esc(p.pg||"")}${p.quando?" · 📅 "+esc(p.quando):""}</small></div><div style="text-align:right"><b>${brl(+p.tot||0)}</b><span class="stt" style="background:${s[2]}">${s[1]}</span></div></button>`}).join(""):`<div class="empty box">Nenhum pedido ${pedPer=="hoje"?"hoje":"nesse período"} ainda.<br><small class="mu">Dica: faça um pedido de teste em <b>Ver loja</b>; ele aparece aqui sozinho.</small></div>`}
@@ -1164,8 +1165,8 @@ function drawPedidos(){const ps=pedFiltro().filter(p=>p.status!="cancel"),fat=ps
   $("view").onclick=e=>{const b=e.target.closest("[data-p]");if(b)verPedido(b.dataset.p)};
   $("pPrintH").onchange=e=>lerPrintPedido(e.target.files);$("pFotoH").onchange=e=>lerPrintPedido(e.target.files);
   $("pCola").onclick=()=>{openSheet(`<h2 style="margin-top:0">📋 Colar o pedido</h2><p class="mu">No WhatsApp, segure a mensagem do pedido → Copiar. Depois cole aqui:</p><textarea id="pTxt" rows="8" style="width:100%" placeholder="Cole aqui a mensagem do pedido"></textarea><br><br><button class="btn full" id="pOk">Registrar pedido</button>
-    <div class="ou"><span>ou</span></div>
-    <label class="btn sec full">📸 Enviar print do pedido<input type="file" accept="image/*" multiple id="pPrint" class="fh"></label>
+    <div class="ou ia"><span>ou</span></div>
+    <label class="btn sec full ia">📸 Enviar print do pedido<input type="file" accept="image/*" multiple id="pPrint" class="fh"></label>
     <p class="mu" style="font-size:.82rem;margin-top:6px">Tirou print do pedido no WhatsApp, no iFood ou de um papel anotado? A IA lê e registra para você. Pode mandar vários pedidos de uma vez.</p><p class="mu" id="pPst" style="font-size:.9rem"></p>`);
     $("pPrint").onchange=e=>lerPrintPedido(e.target.files);
     $("pOk").onclick=()=>{const t=$("pTxt").value;if(!t.trim())return toast("Cole a mensagem do pedido");const p=lerMsgPedido(t);if(!p.tot&&!p.itens.length)return toast("Não achei um pedido nessa mensagem");
@@ -1244,7 +1245,7 @@ function drawVisual(){const L=S.loja,sy=scrollY,ab0=[...document.querySelectorAl
   <div class="salvo" id="vSalvo">✓ Tudo salvo automaticamente</div>
   <label for="vN">Nome da loja</label><input id="vN" value="${esc(L.nome)}">
   <label for="vW">WhatsApp dos pedidos</label><input id="vW" inputmode="tel" value="${esc(L.whats)}">
-  <label for="vS">Frase de apresentação</label><div style="display:flex;gap:8px"><input id="vS" style="flex:1;min-width:0" value="${esc(L.slogan)}" placeholder="Ex.: Doces caseiros feitos com amor"><button class="btn sec sm" id="vSia" style="flex:none;margin:0">✨ Gerar</button></div>
+  <label for="vS">Frase de apresentação</label><div style="display:flex;gap:8px"><input id="vS" style="flex:1;min-width:0" value="${esc(L.slogan)}" placeholder="Ex.: Doces caseiros feitos com amor"><button class="btn sec sm ia" id="vSia" style="flex:none;margin:0">✨ Gerar</button></div>
   <label for="vH">Horário de funcionamento</label><input id="vH" value="${esc(L.horario)}" placeholder="Ex.: Todos os dias, 14h às 23h"><small class="hint" id="vHok">${(()=>{const r=lerHorarioTexto(L.horario);return r?"✓ Entendi: "+r.txt+". A loja abre e fecha sozinha.":"Escreva os dias e horas, ex.: \"seg a sáb 18h às 23h\" ou \"24 horas\""})()}</small>
   <h2 id="secContato">Contato e redes sociais</h2>
   <label for="vIg">Instagram</label><input id="vIg" value="${esc(L.ig||"")}" placeholder="@sualoja">
@@ -1272,7 +1273,7 @@ function drawVisual(){const L=S.loja,sy=scrollY,ab0=[...document.querySelectorAl
   <details class="mais" id="secHora"><summary>🕒 Horário de funcionamento</summary>
   <p class="mu" style="font-size:.85rem;margin-top:8px">A loja abre e fecha sozinha nesses horários. Fechada, ela mostra o aviso e aceita só pedidos agendados.</p>
   <div class="hrs">${["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"].map((d,i)=>{const H=(L.horarios||[])[i]||{on:false,a:"18:00",f:"23:00"};return`<div class="hr"><label class="sw2" style="margin:0"><input type="checkbox" data-hon="${i}" ${H.on?"checked":""}> ${d}</label><input type="time" data-ha="${i}" value="${H.a}" ${H.on?"":"disabled"}><span>às</span><input type="time" data-hf="${i}" value="${H.f}" ${H.on?"":"disabled"}></div>`}).join("")}</div>
-  <button class="btn sec sm" id="hCopia" style="margin-top:8px">Copiar o horário de segunda para todos os dias</button> <label class="btn sec sm" style="margin-top:8px">📸 Ler horário de um print<input type="file" accept="image/*" id="hPrint" class="fh"></label>
+  <button class="btn sec sm" id="hCopia" style="margin-top:8px">Copiar o horário de segunda para todos os dias</button> <label class="btn sec sm ia" style="margin-top:8px">📸 Ler horário de um print<input type="file" accept="image/*" id="hPrint" class="fh"></label>
   <p class="mu" style="font-size:.8rem;margin-top:6px">Fecha depois da meia-noite? Pode pôr, ex.: 18:00 às 01:00.</p>
   <label class="sw2"><input type="checkbox" id="vAg" ${L.semAgendar?"":"checked"}> Aceitar pedidos agendados quando estiver fechada</label>
   <label for="vMf">Recado de loja fechada <small class="mu">(opcional)</small></label><input id="vMf" value="${esc(L.msgFechada||"")}" placeholder="Ex.: estamos de folga hoje, voltamos amanhã!">
@@ -1283,7 +1284,7 @@ function drawVisual(){const L=S.loja,sy=scrollY,ab0=[...document.querySelectorAl
   <label>Taxa de entrega</label><div class="seg">${[["combinar","Combinar no WhatsApp"],["fixo","Valor fixo"],["bairros","Por bairro"]].map(([k,t])=>`<button class="${(L.freteModo||(L.taxa!==""&&L.taxa!=null?"fixo":"combinar"))==k?"on":""}" data-fm="${k}">${t}</button>`).join("")}</div>
   ${(L.freteModo||(L.taxa!==""&&L.taxa!=null?"fixo":"combinar"))=="fixo"?`<label for="vTx">Valor da entrega (R$)</label><input id="vTx" inputmode="decimal" value="${L.taxa??""}" placeholder="Ex.: 7 (0 = grátis)">`:`<input id="vTx" type="hidden" value="${L.taxa??""}">`}
   ${(L.freteModo||(L.taxa!==""&&L.taxa!=null?"fixo":"combinar"))=="bairros"?`<div class="bairros">${(L.bairros||[]).map((b,i)=>`<div class="opr"><input data-bn="${i}" value="${esc(b[0])}" placeholder="Bairro"><input data-bv="${i}" inputmode="decimal" value="${b[1]!==""&&b[1]!=null?String(b[1]).replace(".",","):""}" placeholder="R$"><button class="icon" data-bd="${i}" aria-label="Remover">×</button></div>`).join("")}</div>
-   <button class="btn sec sm" id="bAdd">+ Bairro</button> <button class="btn sec sm" id="bCola">Colar lista</button> <label class="btn sec sm">📸 Ler print da tabela<input type="file" accept="image/*" multiple id="bPrint" class="fh"></label>
+   <button class="btn sec sm" id="bAdd">+ Bairro</button> <button class="btn sec sm" id="bCola">Colar lista</button> <label class="btn sec sm ia">📸 Ler print da tabela<input type="file" accept="image/*" multiple id="bPrint" class="fh"></label>
    <p class="mu" style="font-size:.8rem;margin-top:6px">${(L.bairros||[]).length} bairros. O cliente escolhe o bairro e a taxa entra no total.</p>`:""}
   <div class="row" style="gap:10px"><div style="flex:1"><label for="vFg">Frete grátis acima de (R$)</label><input id="vFg" inputmode="decimal" value="${L.freteGratis||""}" placeholder="Ex.: 80"></div>
   <div style="flex:1"><label for="vMin">Pedido mínimo (R$)</label><input id="vMin" inputmode="decimal" value="${L.minimo||""}" placeholder="Ex.: 20"></div></div>
@@ -1352,8 +1353,8 @@ function drawLoja(){const d=dicasLoja(),feita=dicaFeita;dicaFeita="";
   $("view").innerHTML=`<p class="mu" style="margin-bottom:10px">É assim que seus clientes vão ver. Pode testar: monte um pedido e envie para o seu WhatsApp.</p><div class="phone"><iframe class="prev" id="prev" title="Prévia da loja"></iframe></div>
   <h2>${d.length?"🔎 Dicas para deixar sua loja perfeita":"✅ Sua loja está caprichada!"}</h2>
   ${feita?`<div class="feita">✅ ${feita}</div>`:""}
-  ${d.length?`<div class="box">${d.map(([ic,t,b,go])=>`<div class="chk"><span style="font-size:1.2rem">${ic}</span><span style="flex:1">${t}</span>${go=="nome"?`<div style="display:flex;flex-direction:column;gap:6px"><button class="btn sec sm" id="fxNome">${b}</button><button class="btn sec sm" data-go="visual#vN">Escrever eu mesmo</button></div>`:go=="frase"?`<div style="display:flex;flex-direction:column;gap:6px"><button class="btn sec sm" id="fxFrase">✨ Gerar com IA</button><button class="btn sec sm" data-go="visual#vS">${b}</button></div>`:`<button class="btn sec sm" data-go="${go}">${b}</button>`}</div>`).join("")}</div>`:`<p class="mu">Não achei nada para arrumar. Já pode divulgar o link!</p>`}
-  <button class="imp" id="ljIA" style="margin-top:12px"><span>✨</span><div><b>Pedir para a IA revisar minha loja</b><small>Ela olha o logo, a capa, os nomes e os preços e diz o que melhorar, como um consultor.</small></div></button><div id="ljIAr"></div>`;
+  ${d.length?`<div class="box">${d.map(([ic,t,b,go])=>`<div class="chk"><span style="font-size:1.2rem">${ic}</span><span style="flex:1">${t}</span>${go=="nome"?`<div style="display:flex;flex-direction:column;gap:6px"><button class="btn sec sm" id="fxNome">${b}</button><button class="btn sec sm" data-go="visual#vN">Escrever eu mesmo</button></div>`:go=="frase"?`<div style="display:flex;flex-direction:column;gap:6px"><button class="btn sec sm ia" id="fxFrase">✨ Gerar com IA</button><button class="btn sec sm" data-go="visual#vS">${b}</button></div>`:`<button class="btn sec sm" data-go="${go}">${b}</button>`}</div>`).join("")}</div>`:`<p class="mu">Não achei nada para arrumar. Já pode divulgar o link!</p>`}
+  <button class="imp ia" id="ljIA" style="margin-top:12px"><span>✨</span><div><b>Pedir para a IA revisar minha loja</b><small>Ela olha o logo, a capa, os nomes e os preços e diz o que melhorar, como um consultor.</small></div></button><div id="ljIAr"></div>`;
   $("prev").srcdoc=buildStore();
   if($("fxNome"))$("fxNome").onclick=()=>{const y=scrollY;S.loja.nome=S.loja.nome.replace(/(^|\s)(\p{L})/gu,(m,a,b)=>a+b.toUpperCase()).replace(/\s(D[aeo]s?|E)\s/g,m=>m.toLowerCase());save();dicaFeita=`Nome arrumado para <b>${esc(S.loja.nome)}</b>. Se quiser mudar, toque em Aparência → Nome da loja.`;$("topNome").textContent=S.loja.nome;drawLoja();scrollTo(0,y)};
   if($("fxFrase"))$("fxFrase").onclick=()=>{const y=scrollY;gerarFrase(()=>{dicaFeita=`Frase nova: <b>${esc(S.loja.slogan)}</b>`;drawLoja();scrollTo(0,y)})};
