@@ -583,7 +583,7 @@ const KEY="cardapiofacil_v1";
 const NUVEM=location.hostname.endsWith("github.io")||/[?&]nuvem/.test(location.search);
 const SEMIA=NUVEM?"Essa função com inteligência artificial chega em breve! 🚀":"Essa função usa a IA do Claude e só funciona com o app aberto pelo Claude.";
 const NV=NUVEM?criarNuvem():null;
-if(NUVEM){document.documentElement.classList.add("semia");const st=document.createElement("style");st.textContent="html.semia .ia{display:none!important}";document.head.appendChild(st)}
+if(NUVEM){document.documentElement.classList.add("semia");/* liberado quando a IA carregar */const st=document.createElement("style");st.textContent="html.semia .ia{display:none!important}";document.head.appendChild(st)}
 let S=null;
 try{S=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){}
 try{if(S&&S.grupos)Object.values(S.grupos).forEach(G=>(G.ops||[]).forEach(o=>{if(o[0]=="Não precisa trocar"||o[0]=="Não trocar")o[0]="Pode tirar do pedido (não quero outro)"}))}catch(e){}
@@ -998,7 +998,7 @@ COMO O APP FUNCIONA (só fale de botões que existem):
 - Complementos: grupos de escolhas (cremes, molhos, adicionais…). Dentro do grupo, cada opção tem chave de disponível: desligar quando o ingrediente acaba. Há grupos prontos para adicionar e "Duplicar grupo".
 - Aparência: nome, WhatsApp, frase, horário, logo, capa (capas prontas com foto ou criar com IA), 14 temas de cores, fundo escuro, organização dos produtos (Lista, Grade, Fotos grandes, Compacta), 14 tipos de letra, Mais opções de visual (topo, botões, fotos, cartões, tamanho das letras, texto do botão, selos do topo, faixa de aviso), Horário de funcionamento (dias e horas, abre e fecha sozinha, aceitar agendados, recado de fechada), Pedido e mensagem do WhatsApp (Pix da loja com QR Code e copia e cola automáticos, taxa de entrega: combinar, valor fixo ou por bairro com "Colar lista", frete grátis acima de um valor, formas de pagamento, entrega/retirada, taxa de entrega, pedido mínimo, começo da mensagem, emojis, "Para quando?"), botões de restaurar o padrão.
 - Ver loja: mostra a loja como o cliente vê; dá para testar um pedido.
-- Publicar a loja com link próprio ainda está chegando ("em breve"). Não invente outras funções.
+${NUVEM?`- Publicar: na tela Início, botão "Publicar loja" (ou "Compartilhar loja"). Ele mostra o link da loja para copiar, mandar no WhatsApp e colocar na bio do Instagram. Tudo que o lojista muda no app aparece na loja sozinho em segundos. Os pedidos chegam no WhatsApp e também na aba Pedidos, com um apito. Não invente outras funções.`:`- Publicar a loja com link próprio ainda está chegando ("em breve"). Não invente outras funções.`}
 TIRAR UM PRODUTO: explique as 3 formas usando os nomes do app: 1) tocar no botão "Esgotou" ao lado do produto no Cardápio, ou você mesmo marca com a ferramenta (o produto continua aparecendo apagadinho com "Esgotado hoje" e não dá para pedir; bom quando acabou só hoje); 2) "Desligar a chave verde do produto" no Cardápio (ele some do site, mas fica guardado e é só ligar de novo); 3) "Apagar de vez". Nunca diga "esconder" sem explicar que é a chave verde do Cardápio.
 LOJA FECHADA: quando a loja está fechada, o site mostra um aviso e só aceita pedidos AGENDADOS (o cliente preenche "Para quando"), a não ser que o lojista tenha desligado "Aceitar pedidos agendados quando estiver fechada" no Horário de funcionamento. Explique isso certinho ao fechar a loja.
 FERRAMENTAS: você pode ver e MUDAR a loja usando as ferramentas. Use ver_loja antes de responder sobre a loja dele. Quando o lojista pedir uma mudança simples, faça e conte o que fez. ANTES de apagar algo, mudar muitos preços de uma vez ou trocar o visual inteiro, pergunte "Posso fazer?" e só faça depois do sim.
@@ -1049,7 +1049,7 @@ $("chS").onclick=e=>{const b=e.target.closest("[data-s]");if(b)ajEnviar(b.datase
 async function iaPrint(files,pedido,msgOk){if(!IA){toast(SEMIA);return null}
   const fs=[...files].slice(0,6);if(!fs.length)return null;toast("📸 A IA está lendo o print…");
   try{const blobs=[];for(const f of fs)blobs.push(await paraBlob(await lerImg(f),1100));return await IA.json(pedido,{images:blobs,modelTier:"complex"})}
-  catch(e){toast(e&&e.code=="not_granted"?"Você precisa permitir o uso da IA":e&&e.code=="rate_limited"?"Espere um minutinho e tente de novo":"Não consegui ler o print. Tente uma foto mais nítida.");return null}}
+  catch(e){toast(e&&e.code=="not_granted"?"Você precisa permitir o uso da IA":e&&e.code=="rate_limited"?"A IA está ocupada. Espere um minutinho e tente de novo":"Não consegui ler o print. Tente uma foto mais nítida.");return null}}
 document.addEventListener("change",async e=>{
   if(e.target.id=="bPrint"){const r=await iaPrint(e.target.files,`Leia a(s) imagem(ns): é uma tabela ou lista de taxas de entrega por bairro (pode ser de um motoboy ou app de entrega). Extraia TODOS os bairros e o valor da entrega de cada um, em reais (número). Se houver colunas de valores diferentes (ex.: moto e carro, dia e noite), use a primeira coluna de valor. Responda SOMENTE com JSON: {"bairros":[["Nome do bairro",8.5]]}`);
     if(!r||!Array.isArray(r.bairros)||!r.bairros.length){if(r)toast("Não achei bairros nesse print");return}
@@ -1374,11 +1374,35 @@ Responda SOMENTE com JSON: {"dicas":[{"titulo":"curto","texto":"1 ou 2 frases"}]
 // ---------- NUVEM (Firebase) ----------
 function criarNuvem(){
  const CFG={apiKey:"AIzaSyCqhFHtJzj_L8nkFQmEwz-AcQmipDi3sqg",authDomain:"cardapio-facil-7e83d.firebaseapp.com",projectId:"cardapio-facil-7e83d",storageBucket:"cardapio-facil-7e83d.firebasestorage.app",messagingSenderId:"1001113738710",appId:"1:1001113738710:web:a4b108b9a309eb6e88d877"};
- const BASE=window.CF_FB_BASE||"https://www.gstatic.com/firebasejs/10.14.1/";
+ const BASE=window.CF_FB_BASE||"https://www.gstatic.com/firebasejs/12.0.0/";
+ const RECAPTCHA="6LfHvjIuAAAAAOtZodB_apVHT6i7i0HUtGRzdYYp",MOD_JSON=["gemini-3.5-flash","gemini-2.5-flash"],MOD_CHAT=["gemini-2.5-flash","gemini-3.5-flash"];
  const SITE=location.origin+location.pathname.replace(/[^/]*$/,"");
  const RE=/data:image\/[a-zA-Z+.-]+;base64,[A-Za-z0-9+/=]+/g;
  let A,F,auth,db,user=null,slug=null,tm=0,ultimo="",subidas=new Set(),criado=false,ouvindo=null,enviando=null,primeira=true,modo="entrar";
  const css=`#nv{position:fixed;inset:0;z-index:200;background:linear-gradient(160deg,#e3f6ec,#f6f9f7 55%);display:flex;align-items:center;justify-content:center;padding:18px;overflow:auto}#nv .cx{background:#fff;border-radius:22px;box-shadow:0 10px 40px rgba(15,60,35,.12);padding:26px 22px;max-width:390px;width:100%;text-align:center}#nv .lg{width:76px;height:76px;display:block;margin:0 auto 10px;filter:drop-shadow(0 6px 14px rgba(15,60,35,.25))}#nv h1{font-size:1.45rem;margin:0 0 4px;color:var(--ink)}#nv p{color:var(--mu);margin:0 0 16px;font-size:.95rem}#nv input{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;font:inherit;margin-bottom:10px;background:#fff;color:#222}#nv input:focus{outline:2px solid var(--a);border-color:transparent}#nv .b{width:100%;padding:13px;border-radius:12px;border:0;font:inherit;font-weight:700;cursor:pointer;background:var(--a);color:#fff;font-size:1rem}#nv .g{background:#fff;color:#222;border:1.5px solid #dadce0;display:flex;align-items:center;justify-content:center;gap:10px}#nv .ou{display:flex;align-items:center;gap:10px;color:var(--mu);font-size:.85rem;margin:16px 0}#nv .ou:before,#nv .ou:after{content:"";flex:1;height:1px;background:var(--line)}#nv .lk{background:none;border:0;color:var(--a);font:inherit;font-weight:700;cursor:pointer;padding:6px;font-size:.92rem}#nv .er{color:#b3261e;font-size:.9rem;margin:4px 0 10px;min-height:1em}#nv .ok{color:var(--a)}#nv .sp{width:38px;height:38px;border:4px solid var(--a2);border-top-color:var(--a);border-radius:50%;animation:nvr 1s linear infinite;margin:10px auto}@keyframes nvr{to{transform:rotate(360deg)}}#nv small{color:var(--mu);display:block;margin-top:14px;font-size:.8rem}`;
+
+ function iaLigada(ok){document.documentElement.classList.toggle("semia",!ok)}
+ function limpaSchema(x){if(!x||typeof x!="object")return x;const o={};let t=x.type;if(Array.isArray(t)){const nn=t.filter(v=>v!="null");if(nn.length<t.length)o.nullable=true;t=nn[0]||"string"}if(t)o.type=t;if(x.description)o.description=x.description;if(x.enum)o.enum=x.enum;
+  if(x.properties){o.properties={};for(const k in x.properties)o.properties[k]=limpaSchema(x.properties[k]);if(!Object.keys(o.properties).length){o.properties={_:{type:"string",description:"não use"}}}}if(x.required&&x.required.length)o.required=x.required;if(x.items)o.items=limpaSchema(x.items);return o}
+ const b64=b=>new Promise((ok,bad)=>{const r=new FileReader();r.onerror=bad;r.onload=()=>ok(String(r.result).split(",")[1]);r.readAsDataURL(b)});
+ function errIA(e){console.error(e);const m=String(e&&(e.message||e.code)||"");if(/429|quota|exhausted|rate/i.test(m))return{code:"rate_limited",message:m};if(/app-?check|recaptcha|403|permission/i.test(m))return{code:"bloqueado",message:m};return{code:"erro",message:m}}
+ function criarIA(aiM,ap){const ai=aiM.getAI(ap,{backend:new aiM.GoogleAIBackend()});const idx={json:0,chat:0},LIS={json:MOD_JSON,chat:MOD_CHAT};
+  const modelo=(tipo,cfg={})=>aiM.getGenerativeModel(ai,{model:LIS[tipo][idx[tipo]],...cfg});
+  async function tenta(tipo,fn){for(;;){try{return await fn()}catch(e){const m=String(e&&e.message||"");if(idx[tipo]<LIS[tipo].length-1&&/not.?found|404|not supported|unsupported model|thought.?signature|deprecated|retired/i.test(m)){idx[tipo]++;continue}throw errIA(e)}}}
+  const f=async(msgs,{tools,onText}={})=>tenta("chat",async()=>{
+   const decl=(tools||[]).map(t=>({name:t.name,description:t.description||"",parameters:limpaSchema(t.inputSchema||{type:"object",properties:{}})}));
+   const m=modelo("chat",decl.length?{tools:[{functionDeclarations:decl}]}:{});
+   const hist=msgs.map(x=>({role:x.role=="assistant"?"model":"user",parts:[{text:String(x.content||"")}]}));
+   const ultimo=hist.pop();const chat=m.startChat({history:hist});let r=await chat.sendMessage(ultimo.parts),texto="";
+   for(let volta=0;volta<8;volta++){const resp=r.response;const calls=(resp.functionCalls&&resp.functionCalls())||[];let t="";try{t=resp.text()}catch(e){}if(t){texto+=(texto?"\n":"")+t;onText&&onText({text:texto})}
+    if(!calls.length)break;const partes=[];for(const c of calls){const tool=(tools||[]).find(x=>x.name==c.name);let out;try{out=tool?await tool.execute(c.args||{}):"ferramenta não existe"}catch(e){out="erro: "+(e&&e.message||e)}partes.push({functionResponse:{name:c.name,response:{resultado:typeof out=="string"?out:JSON.parse(JSON.stringify(out??"ok"))}}})}
+    r=await chat.sendMessage(partes)}
+   return{text:texto}});
+  f.json=async(prompt,{images=[]}={})=>tenta("json",async()=>{const m=modelo("json",{generationConfig:{responseMimeType:"application/json",temperature:.4}});
+   const partes=[{text:prompt+(images.length?"\n\nObservação: nas caixas (box), use exatamente o formato pedido, [x0,y0,x1,y1] em frações de 0 a 1, onde x é a posição na horizontal (esquerda→direita) e y na vertical (cima→baixo).":"")}];
+   for(const b of images)partes.push({inlineData:{mimeType:b.type||"image/jpeg",data:await b64(b)}});
+   const r=await m.generateContent(partes);let t=r.response.text().trim().replace(/^```(?:json)?\s*|\s*```$/g,"");return JSON.parse(t)});
+  return f}
  function tela(h){let el=$("nv");if(!el){const st=document.createElement("style");st.textContent=css;document.head.appendChild(st);el=document.createElement("div");el.id="nv";document.body.appendChild(el)}el.innerHTML=`<div class="cx">${h}</div>`;el.style.display="flex";return el}
  function fecharTela(){const el=$("nv");if(el)el.style.display="none"}
  function carregando(t){tela(`<img class="lg" src="icone-192.png" alt=""><h1>Cardápio Fácil</h1><div class="sp"></div><p>${t}</p>`)}
@@ -1435,7 +1459,8 @@ function criarNuvem(){
   }catch(e){console.error(e);tela(`<img class="lg" src="icone-192.png" alt=""><h1>Ops!</h1><p>Não consegui abrir sua loja. Confira a internet.</p><button class="b" onclick="location.reload()">Tentar de novo</button>`);return}
   fecharTela();posBoot();ouvir()}
  async function boot(){carregando("Carregando…");
-  try{const r=await Promise.all([import(BASE+"firebase-app.js"),import(BASE+"firebase-auth.js"),import(BASE+"firebase-firestore.js")]);A=r[1];F=r[2];const ap=r[0].initializeApp(CFG);auth=A.getAuth(ap);db=F.getFirestore(ap);try{auth.languageCode="pt-BR"}catch(e){}}
+  try{const r=await Promise.all([import(BASE+"firebase-app.js"),import(BASE+"firebase-auth.js"),import(BASE+"firebase-firestore.js")]);A=r[1];F=r[2];const ap=r[0].initializeApp(CFG);auth=A.getAuth(ap);db=F.getFirestore(ap);try{auth.languageCode="pt-BR"}catch(e){}
+   Promise.all([import(BASE+"firebase-app-check.js"),import(BASE+"firebase-ai.js")]).then(([acM,aiM])=>{try{acM.initializeAppCheck(ap,{provider:new acM.ReCaptchaEnterpriseProvider(RECAPTCHA),isTokenAutoRefreshEnabled:true})}catch(e){console.error(e)}IA=criarIA(aiM,ap);iaLigada(true)}).catch(e=>{console.error(e);IA=null;iaLigada(false)})}
   catch(e){console.error(e);tela(`<img class="lg" src="icone-192.png" alt=""><h1>Sem conexão</h1><p>Não consegui conectar. Confira a internet e tente de novo.</p><button class="b" onclick="location.reload()">Tentar de novo</button>`);return}
   try{A.getRedirectResult(auth).catch(()=>{})}catch(e){}
   A.onAuthStateChanged(auth,u=>{if(u){if(!user||user.uid!=u.uid)entrar(u)}else{user=null;login()}})}
