@@ -1382,7 +1382,7 @@ Responda SOMENTE com JSON: {"dicas":[{"titulo":"curto","texto":"1 ou 2 frases"}]
 function criarNuvem(){
  const CFG={apiKey:"AIzaSyCqhFHtJzj_L8nkFQmEwz-AcQmipDi3sqg",authDomain:"cardapio-facil-7e83d.firebaseapp.com",projectId:"cardapio-facil-7e83d",storageBucket:"cardapio-facil-7e83d.firebasestorage.app",messagingSenderId:"1001113738710",appId:"1:1001113738710:web:a4b108b9a309eb6e88d877"};
  const BASE=window.CF_FB_BASE||"https://www.gstatic.com/firebasejs/12.0.0/";
- const RECAPTCHA="6LfHvjIuAAAAAOtZodB_apVHT6i7i0HUtGRzdYYp",MOD_JSON=["gemini-3.5-flash","gemini-2.5-flash"],MOD_CHAT=["gemini-2.5-flash","gemini-3.5-flash"];
+ const RECAPTCHA="6LfHvjIuAAAAAOtZodB_apVHT6i7i0HUtGRzdYYp",MOD_JSON=["gemini-3.5-flash","gemini-2.5-flash"],MOD_CHAT=["gemini-2.5-flash","gemini-3.5-flash"],MOD_RAPIDO=["gemini-3.5-flash-lite","gemini-2.5-flash-lite","gemini-2.5-flash"];
  const SITE=location.origin+location.pathname.replace(/[^/]*$/,"");
  const RE=/data:image\/[a-zA-Z+.-]+;base64,[A-Za-z0-9+/=]+/g;
  let A,F,auth,db,user=null,slug=null,tm=0,ultimo="",subidas=new Set(),criado=false,ouvindo=null,enviando=null,primeira=true,modo="entrar";
@@ -1393,22 +1393,22 @@ function criarNuvem(){
   if(x.properties){o.properties={};for(const k in x.properties)o.properties[k]=limpaSchema(x.properties[k]);if(!Object.keys(o.properties).length){o.properties={_:{type:"string",description:"não use"}}}}if(x.required&&x.required.length)o.required=x.required;if(x.items)o.items=limpaSchema(x.items);return o}
  const b64=b=>new Promise((ok,bad)=>{const r=new FileReader();r.onerror=bad;r.onload=()=>ok(String(r.result).split(",")[1]);r.readAsDataURL(b)});
  function errIA(e){console.error(e);const m=String(e&&(e.message||e.code)||"");if(/429|quota|exhausted|rate/i.test(m))return{code:"rate_limited",message:m};if(/app-?check|recaptcha|403|permission/i.test(m))return{code:"bloqueado",message:m};return{code:"erro",message:m}}
- function criarIA(aiM,ap){const ai=aiM.getAI(ap,{backend:new aiM.GoogleAIBackend()});const idx={json:0,chat:0},LIS={json:MOD_JSON,chat:MOD_CHAT};
+ function criarIA(aiM,ap){const ai=aiM.getAI(ap,{backend:new aiM.GoogleAIBackend()});const idx={json:0,chat:0,rapido:0},LIS={json:MOD_JSON,chat:MOD_CHAT,rapido:MOD_RAPIDO};
   const modelo=(tipo,cfg={})=>aiM.getGenerativeModel(ai,{model:LIS[tipo][idx[tipo]],...cfg});
   async function tenta(tipo,fn){for(;;){try{return await fn()}catch(e){if(e&&e.code=="tempo")throw e;const m=String(e&&e.message||"");if(/thinking/i.test(m)&&/level|config|invalid/i.test(m)&&idx[tipo]<LIS[tipo].length-1){idx[tipo]++;continue}if(idx[tipo]<LIS[tipo].length-1&&/not.?found|404|not supported|unsupported model|thought.?signature|deprecated|retired/i.test(m)){idx[tipo]++;continue}throw errIA(e)}}}
   const f=async(msgs,{tools,onText}={})=>tenta("chat",async()=>{
    const decl=(tools||[]).map(t=>({name:t.name,description:t.description||"",parameters:limpaSchema(t.inputSchema||{type:"object",properties:{}})}));
-   const m=modelo("chat",decl.length?{tools:[{functionDeclarations:decl}]}:{});
+   const nm=LIS.chat[idx.chat];const m=modelo("chat",{...(decl.length?{tools:[{functionDeclarations:decl}]}:{}),...(/^gemini-2\.5/.test(nm)?{generationConfig:{thinkingConfig:{thinkingBudget:0}}}:{})});
    const hist=msgs.map(x=>({role:x.role=="assistant"?"model":"user",parts:[{text:String(x.content||"")}]}));
    const ultimo=hist.pop();const chat=m.startChat({history:hist});let r=await chat.sendMessage(ultimo.parts),texto="";
    for(let volta=0;volta<8;volta++){const resp=r.response;const calls=(resp.functionCalls&&resp.functionCalls())||[];let t="";try{t=resp.text()}catch(e){}if(t){texto+=(texto?"\n":"")+t;onText&&onText({text:texto})}
     if(!calls.length)break;const partes=[];for(const c of calls){const tool=(tools||[]).find(x=>x.name==c.name);let out;try{out=tool?await tool.execute(c.args||{}):"ferramenta não existe"}catch(e){out="erro: "+(e&&e.message||e)}partes.push({functionResponse:{name:c.name,response:{resultado:typeof out=="string"?out:JSON.parse(JSON.stringify(out??"ok"))}}})}
     r=await chat.sendMessage(partes)}
    return{text:texto}});
-  f.json=async(prompt,{images=[],caixas}={})=>tenta("json",async()=>{const nome=LIS.json[idx.json],gc={responseMimeType:"application/json",temperature:.4};if(/^gemini-3/.test(nome)&&!caixas&&!images.length)gc.thinkingConfig={thinkingLevel:"low"};const m=modelo("json",{generationConfig:gc});
+  f.json=async(prompt,{images=[],caixas,modelTier}={})=>{const tp=(!images.length&&modelTier!="complex")?"rapido":"json";return tenta(tp,async()=>{const nome=LIS[tp][idx[tp]],gc={responseMimeType:"application/json",temperature:.5};if(tp=="rapido"&&/^gemini-2\.5/.test(nome))gc.thinkingConfig={thinkingBudget:0};const m=modelo(tp,{generationConfig:gc});
    const partes=[{text:prompt+(caixas?"\n\nIMPORTANTE sobre as caixas (box): use o formato [ymin, xmin, ymax, xmax] com inteiros de 0 a 1000, marcando bem justo a borda da FOTO do produto (o quadrado com a imagem da comida), sem incluir o texto ao lado.":"")}];
    for(const b of images)partes.push({inlineData:{mimeType:b.type||"image/jpeg",data:await b64(b)}});
-   const r=await Promise.race([m.generateContent(partes),new Promise((_,bad)=>setTimeout(()=>bad({code:"tempo",message:"tempo esgotado"}),150000))]);let t=r.response.text().trim().replace(/^```(?:json)?\s*|\s*```$/g,"");return JSON.parse(t)});
+   const r=await Promise.race([m.generateContent(partes),new Promise((_,bad)=>setTimeout(()=>bad({code:"tempo",message:"tempo esgotado"}),150000))]);let t=r.response.text().trim().replace(/^```(?:json)?\s*|\s*```$/g,"");return JSON.parse(t)})};
   return f}
  function tela(h){let el=$("nv");if(!el){const st=document.createElement("style");st.textContent=css;document.head.appendChild(st);el=document.createElement("div");el.id="nv";document.body.appendChild(el)}el.innerHTML=`<div class="cx">${h}</div>`;el.style.display="flex";return el}
  function fecharTela(){const el=$("nv");if(el)el.style.display="none"}
