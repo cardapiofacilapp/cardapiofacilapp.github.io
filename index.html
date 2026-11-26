@@ -953,10 +953,14 @@ Responda SOMENTE com JSON neste formato:
 {"loja":{"nome":"","cor":"#rrggbb","dest":"#rrggbb","escuro":false,"logo":{"img":0,"box":[0,0,0,0]}},"cats":[{"nome":"","bebida":false,"itens":[{"n":"","d":"","p":0,"po":null,"promo":"","img":0,"box":[0,0,0,0]}]}],"prompt":""}`;
     const t0=Date.now(),tk=setInterval(()=>{st.textContent=`A IA está lendo os prints… ${Math.round((Date.now()-t0)/1000)} s (costuma levar de 30 a 90 segundos)`},1000);st.textContent="A IA está lendo os prints…";
     let r;try{r=await IA.json(ask,{images:blobs,modelTier:"complex",caixas:NUVEM})}finally{clearInterval(tk)}
+    if(r&&typeof r=="object"){try{console.log("IA import bruto:",JSON.stringify(r).slice(0,3000))}catch(er){}
+      if(!r.cats)r.cats=r.categorias||r.categories||[];if(!r.loja)r.loja=r.store||{};
+      r.cats=(r.cats||[]).map(c=>({...c,nome:c.nome||c.name||c.categoria||"Produtos",itens:(c.itens||c.items||c.produtos||c.products||[]).map(i=>({...i,n:i.n||i.nome||i.name||i.produto||"",d:i.d??i.descricao??i.description??"",p:i.p??i.preco??i.price??0,po:i.po??i.precoAntigo??i.preco_antigo??null,promo:i.promo||"",img:i.img??i.imagem??null,box:i.box||i.caixa||null}))}));
+      const tot=r.cats.reduce((a,c)=>a+c.itens.filter(i=>i.n).length,0);if(!tot)throw{code:"vazio",message:"a IA não encontrou produtos nos prints"}}
     if(NUVEM&&r){const cv=b=>Array.isArray(b)&&b.length==4&&b.some(v=>v>1.5)?[b[1]/1000,b[0]/1000,b[3]/1000,b[2]/1000]:b;(r.cats||[]).forEach(c=>(c.itens||[]).forEach(i=>i.box=cv(i.box)));if(r.loja&&r.loja.logo)r.loja.logo.box=cv(r.loja.logo.box)}
     if(!r||!Array.isArray(r.cats))throw{message:"resposta vazia"};
     impRes=r;try{sessionStorage.setItem("cfImpRes",JSON.stringify(r))}catch(er){}mostrarImport()}
-  catch(e){bt.disabled=false;st.textContent=e&&e.code=="not_granted"?"Você não autorizou a IA. Tente de novo e toque em Permitir.":e&&e.code=="rate_limited"?"A IA está ocupada (limite do plano grátis). Espere um minuto e tente de novo.":e&&e.code=="tempo"?"A IA demorou demais. Tente com menos prints de cada vez (3 ou 4).":e&&e.code=="bloqueado"?"A IA bloqueou o acesso (verificação de segurança). Recarregue a página e tente de novo.":"Não consegui ler os prints. Tente com menos prints ou prints mais nítidos.";if(e&&e.message)st.innerHTML+=`<br><small style="opacity:.6">Detalhe: ${esc(String(e.message).slice(0,160))}</small>`}}
+  catch(e){bt.disabled=false;st.textContent=e&&e.code=="not_granted"?"Você não autorizou a IA. Tente de novo e toque em Permitir.":e&&e.code=="rate_limited"?"A IA está ocupada (limite do plano grátis). Espere um minuto e tente de novo.":e&&e.code=="vazio"?"A IA não conseguiu ler os produtos desses prints. Tente de novo (às vezes na segunda vai) ou use prints mais nítidos, só da parte do cardápio.":e&&e.code=="tempo"?"A IA demorou demais. Tente com menos prints de cada vez (3 ou 4).":e&&e.code=="bloqueado"?"A IA bloqueou o acesso (verificação de segurança). Recarregue a página e tente de novo.":"Não consegui ler os prints. Tente com menos prints ou prints mais nítidos.";if(e&&e.message)st.innerHTML+=`<br><small style="opacity:.6">Detalhe: ${esc(String(e.message).slice(0,160))}</small>`}}
 function mostrarImport(){const r=impRes,n=r.cats.reduce((a,c)=>a+(c.itens||[]).length,0),L=r.loja||{};
   openSheet(`<h2 style="margin-top:0">✨ Achei ${n==1?"um produto":n+" produtos"} em ${r.cats.length==1?"uma categoria":r.cats.length+" categorias"}</h2>
   ${r.cats.map((c,ci)=>`<div class="impc"><b><span class="nb">${ci+1}</span>${esc(c.nome)}</b><small>${(c.itens||[]).map(i=>esc(i.n)+" · "+brl(+i.p||0)).join("<br>")}</small></div>`).join("")}
@@ -970,7 +974,7 @@ function mostrarImport(){const r=impRes,n=r.cats.reduce((a,c)=>a+(c.itens||[]).l
   $("impTipo").onclick=e=>{const b=e.target.closest("[data-f]");if(b)$("impTipo").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x==b))};
   $("impModo").onclick=e=>{const b=e.target.closest("[data-m]");if(b)$("impModo").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x==b))};
   $("impOk").onclick=aplicarImport}
-function aplicarImport(){["cfImp","cfImpImgs","cfImpRes"].forEach(k=>{try{sessionStorage.removeItem(k)}catch(e){}});const r=impRes,L=S.loja,foto=$("impTipo").querySelector(".on").dataset.f=="1",troca=$("impModo").querySelector(".on").dataset.m=="s";
+function aplicarImport(){if(!impRes||!(impRes.cats||[]).some(c=>(c.itens||[]).some(i=>i.n))){toast("Nenhum produto foi lido. Nada foi apagado.");return}["cfImp","cfImpImgs","cfImpRes"].forEach(k=>{try{sessionStorage.removeItem(k)}catch(e){}});const r=impRes,L=S.loja,foto=$("impTipo").querySelector(".on").dataset.f=="1",troca=$("impModo").querySelector(".on").dataset.m=="s";
   const ok=v=>typeof v=="string"&&/^#[0-9a-f]{6}$/i.test(v);
   if($("impLogo")&&$("impLogo").checked){const lg=r.loja.logo,im=impImgs[lg.img];const d=im&&recorte(im,lg.box,300);if(d)L.logo=d}
   if(r.loja.nome&&!L.nome)L.nome=r.loja.nome;
@@ -1401,7 +1405,7 @@ function criarNuvem(){
     if(!calls.length)break;const partes=[];for(const c of calls){const tool=(tools||[]).find(x=>x.name==c.name);let out;try{out=tool?await tool.execute(c.args||{}):"ferramenta não existe"}catch(e){out="erro: "+(e&&e.message||e)}partes.push({functionResponse:{name:c.name,response:{resultado:typeof out=="string"?out:JSON.parse(JSON.stringify(out??"ok"))}}})}
     r=await chat.sendMessage(partes)}
    return{text:texto}});
-  f.json=async(prompt,{images=[],caixas}={})=>tenta("json",async()=>{const nome=LIS.json[idx.json],gc={responseMimeType:"application/json",temperature:.4};if(/^gemini-3/.test(nome))gc.thinkingConfig={thinkingLevel:"low"};const m=modelo("json",{generationConfig:gc});
+  f.json=async(prompt,{images=[],caixas}={})=>tenta("json",async()=>{const nome=LIS.json[idx.json],gc={responseMimeType:"application/json",temperature:.4};if(/^gemini-3/.test(nome)&&!caixas&&!images.length)gc.thinkingConfig={thinkingLevel:"low"};const m=modelo("json",{generationConfig:gc});
    const partes=[{text:prompt+(caixas?"\n\nIMPORTANTE sobre as caixas (box): use o formato [ymin, xmin, ymax, xmax] com inteiros de 0 a 1000, marcando bem justo a borda da FOTO do produto (o quadrado com a imagem da comida), sem incluir o texto ao lado.":"")}];
    for(const b of images)partes.push({inlineData:{mimeType:b.type||"image/jpeg",data:await b64(b)}});
    const r=await Promise.race([m.generateContent(partes),new Promise((_,bad)=>setTimeout(()=>bad({code:"tempo",message:"tempo esgotado"}),150000))]);let t=r.response.text().trim().replace(/^```(?:json)?\s*|\s*```$/g,"");return JSON.parse(t)});
