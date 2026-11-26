@@ -1045,7 +1045,7 @@ async function ajEnviar(t){t=t.trim();if(!t||chatBusy)return;if(!IA)return toast
   if(msgs[0].role!="user")msgs.shift();
   try{const r=await IA(msgs,{tools:AJ_TOOLS,onText:({text})=>{if(text){out.innerHTML=mdSimples(text);out.classList.remove("wait");$("chM").scrollTop=1e9}}});
     const txt=(r&&r.text||"").trim()||"Pronto!";out.innerHTML=mdSimples(txt);out.classList.remove("wait");chatH.push({role:"assistant",content:txt})}
-  catch(e){out.classList.remove("wait");out.textContent=e&&e.code=="not_granted"?"Você precisa permitir o uso da IA. Tente de novo e toque em Permitir.":e&&e.code=="rate_limited"?"Muitas mensagens seguidas. Espere um minutinho e tente de novo.":"Ops, não consegui responder agora. Tente de novo.";chatH.pop()}
+  catch(e){out.classList.remove("wait");out.textContent=e&&e.code=="not_granted"?"Você precisa permitir o uso da IA. Tente de novo e toque em Permitir.":e&&e.code=="rate_limited"?"Muitas mensagens seguidas. Espere um minutinho e tente de novo.":"Ops, não consegui responder agora. Tente de novo.";if(NUVEM&&e&&e.message)out.innerHTML+=`<br><small style="opacity:.6">Detalhe: ${esc(String(e.message).slice(0,160))}</small>`;chatH.pop()}
   chatBusy=false;$("chB").disabled=false}
 $("fab").onclick=abrirChat;$("chX").onclick=()=>{$("chat").classList.remove("open");$("chat").setAttribute("aria-hidden","true")};
 $("chF").onsubmit=e=>{e.preventDefault();ajEnviar($("chI").value)};
@@ -1082,7 +1082,7 @@ Responda SOMENTE com JSON: {"frases":["","","","",""]}`,{modelTier:"quick"});
     $("gfSt").textContent="Toque na que você mais gostou:";
     $("gfOps").innerHTML=fs.map((f,i)=>`<button class="frase" data-fr="${i}">${esc(f)}</button>`).join("")+`<button class="btn sec full" id="gfMais" style="margin-top:8px">🔄 Gerar outras</button>`;
     $("gfOps").onclick=e=>{const b=e.target.closest("[data-fr]");if(b){S.loja.slogan=fs[+b.dataset.fr];save();closeSheet();toast("✓ Frase colocada na sua loja");depois&&depois()}if(e.target.closest("#gfMais"))gerarFrase(depois)}}
-  catch(e){$("gfSt").textContent=e&&e.code=="not_granted"?"Você precisa permitir o uso da IA.":"Não consegui gerar agora. Tente de novo."}}
+  catch(e){$("gfSt").innerHTML=(e&&e.code=="not_granted"?"Você precisa permitir o uso da IA.":e&&e.code=="rate_limited"?"A IA atingiu o limite do plano grátis por agora. Tente daqui a alguns minutos.":"Não consegui gerar agora. Tente de novo.")+(e&&e.message?`<br><small style="opacity:.6">Detalhe: ${esc(String(e.message).slice(0,160))}</small>`:"")}}
 
 function lerHorarioTexto(t){let s=String(t||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");if(!s.trim())return null;
   const all=()=>[0,1,2,3,4,5,6];
@@ -1376,7 +1376,7 @@ Em lojas de mercado/produtos embalados, a marca no nome do produto ajuda o clien
 Dados da loja: ${JSON.stringify(ajResumo()).slice(0,6000)}
 Responda SOMENTE com JSON: {"dicas":[{"titulo":"curto","texto":"1 ou 2 frases"}]}`,{images:imgs,modelTier:"default"});
     const ds=(r&&r.dicas)||[];out.innerHTML=ds.length?`<div class="box">${ds.map(x=>`<div class="chk"><span style="flex:1"><b>${esc(x.titulo||"")}</b><br><small class="mu">${esc(x.texto||"")}</small></span></div>`).join("")}</div><p class="mu" style="font-size:.85rem">Quer ajuda para fazer alguma? Toque no 💬 Ajudante.</p>`:`<p class="mu">A IA não encontrou nada para melhorar. 👏</p>`}
-  catch(e){out.innerHTML=`<p class="mu">${e&&e.code=="not_granted"?"Você precisa permitir o uso da IA.":"Não consegui revisar agora. Tente de novo."}</p>`}}
+  catch(e){out.innerHTML=`<p class="mu">${e&&e.code=="not_granted"?"Você precisa permitir o uso da IA.":e&&e.code=="rate_limited"?"A IA atingiu o limite do plano grátis por agora. Tente daqui a alguns minutos.":"Não consegui revisar agora. Tente de novo."}${e&&e.message?`<br><small style="opacity:.6">Detalhe: ${esc(String(e.message).slice(0,160))}</small>`:""}</p>`}}
 
 // ---------- NUVEM (Firebase) ----------
 function criarNuvem(){
@@ -1392,10 +1392,10 @@ function criarNuvem(){
  function limpaSchema(x){if(!x||typeof x!="object")return x;const o={};let t=x.type;if(Array.isArray(t)){const nn=t.filter(v=>v!="null");if(nn.length<t.length)o.nullable=true;t=nn[0]||"string"}if(t)o.type=t;if(x.description)o.description=x.description;if(x.enum)o.enum=x.enum;
   if(x.properties){o.properties={};for(const k in x.properties)o.properties[k]=limpaSchema(x.properties[k]);if(!Object.keys(o.properties).length){o.properties={_:{type:"string",description:"não use"}}}}if(x.required&&x.required.length)o.required=x.required;if(x.items)o.items=limpaSchema(x.items);return o}
  const b64=b=>new Promise((ok,bad)=>{const r=new FileReader();r.onerror=bad;r.onload=()=>ok(String(r.result).split(",")[1]);r.readAsDataURL(b)});
- function errIA(e){console.error(e);const m=String(e&&(e.message||e.code)||"");if(/429|quota|exhausted|rate/i.test(m))return{code:"rate_limited",message:m};if(/app-?check|recaptcha|403|permission/i.test(m))return{code:"bloqueado",message:m};return{code:"erro",message:m}}
+ function errIA(e){console.error(e);const m=String(e&&(e.message||e.code)||"");if(/429|quota|exhausted|rate|overloaded|503/i.test(m))return{code:"rate_limited",message:m};if(/app-?check|recaptcha|403|permission/i.test(m))return{code:"bloqueado",message:m};return{code:"erro",message:m}}
  function criarIA(aiM,ap){const ai=aiM.getAI(ap,{backend:new aiM.GoogleAIBackend()});const idx={json:0,chat:0,rapido:0},LIS={json:MOD_JSON,chat:MOD_CHAT,rapido:MOD_RAPIDO};
   const modelo=(tipo,cfg={})=>aiM.getGenerativeModel(ai,{model:LIS[tipo][idx[tipo]],...cfg});
-  async function tenta(tipo,fn){for(;;){try{return await fn()}catch(e){if(e&&e.code=="tempo")throw e;const m=String(e&&e.message||"");if(/thinking/i.test(m)&&/level|config|invalid/i.test(m)&&idx[tipo]<LIS[tipo].length-1){idx[tipo]++;continue}if(idx[tipo]<LIS[tipo].length-1&&/not.?found|404|not supported|unsupported model|thought.?signature|deprecated|retired/i.test(m)){idx[tipo]++;continue}throw errIA(e)}}}
+  async function tenta(tipo,fn){for(;;){try{return await fn()}catch(e){if(e&&e.code=="tempo")throw e;const m=String(e&&e.message||"");if(/thinking/i.test(m)&&/level|config|invalid/i.test(m)&&idx[tipo]<LIS[tipo].length-1){idx[tipo]++;continue}if(idx[tipo]<LIS[tipo].length-1&&/not.?found|404|not supported|unsupported model|thought.?signature|deprecated|retired|429|quota|exhausted|rate.?limit|overloaded|503|unavailable/i.test(m)){idx[tipo]++;continue}const er=errIA(e);window.__iaErro=er.message;throw er}}}
   const f=async(msgs,{tools,onText}={})=>tenta("chat",async()=>{
    const decl=(tools||[]).map(t=>({name:t.name,description:t.description||"",parameters:limpaSchema(t.inputSchema||{type:"object",properties:{}})}));
    const nm=LIS.chat[idx.chat];const m=modelo("chat",{...(decl.length?{tools:[{functionDeclarations:decl}]}:{}),...(/^gemini-2\.5/.test(nm)?{generationConfig:{thinkingConfig:{thinkingBudget:0}}}:{})});
